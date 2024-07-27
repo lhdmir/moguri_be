@@ -50,4 +50,4 @@ jobs:
           script: |
             sudo apt-get update
             sudo apt-get install -y tmux
-            tmux new-session -d -s deploy_session 'pgrep -f app.jar | xargs -r kill -9 && nohup java -jar ${{ secrets.REMOTE_PATH }}/app.jar --spring.profiles.active=prod > ${{ secrets.REMOTE_PATH }}/app.log 2>&1'
+            tmux new-session -d -s deploy_session 'pgrep -f app.jar | xargs -r kill -9; nohup java -jar ${{ secrets.REMOTE_PATH }}/app.jar --spring.profiles.active=prod > ${{ secrets.REMOTE_PATH }}/app.log 2>&1 &'
