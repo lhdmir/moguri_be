@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [closed]
+    types: [ closed ]
 
 jobs:
   build:
@@ -39,6 +39,10 @@ jobs:
           scp -o StrictHostKeyChecking=no target/*.jar $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/app.jar
           
           ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << 'EOF'
+            # Create log file with the appropriate permissions
+            touch $REMOTE_PATH/app.log
+            chmod 666 $REMOTE_PATH/app.log
+          
             # Graceful shutdown of existing application
             APP_PID=$(pgrep -f app.jar)
             if [ -n "$APP_PID" ]; then
@@ -59,4 +63,3 @@ jobs:
               exit 1
             fi
           EOF
-     
