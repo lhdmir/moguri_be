@@ -22,11 +22,6 @@ public class ApiController {
         return "Hello World!";
     }
 
-    @GetMapping("/why")
-    public String why() {
-        return "fuck!";
-    }
-
     @GetMapping("/dbtest")
     public List<TestTable> dbTest() {
         return testTableRepository.findAll();
