@@ -36,8 +36,8 @@ jobs:
           echo "${SSH_PRIVATE_KEY//\\n/$'\n'}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "pgrep -f app.jar | xargs -r kill -9"
-
           scp -o StrictHostKeyChecking=no target/*.jar $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/app.jar
+
+          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "pgrep -f app.jar | xargs -r kill -9"
 
           ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "nohup java -jar $REMOTE_PATH/app.jar --spring.profiles.active=prod > $REMOTE_PATH/app.log 2>&1 &"
