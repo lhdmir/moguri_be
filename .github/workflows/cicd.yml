@@ -32,7 +32,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: target/*.jar
-          target: ${{ secrets.REMOTE_PATH }}/
+          target: ${{ secrets.REMOTE_PATH }}/app.jar
 
       - name: SSH to server
         uses: appleboy/ssh-action@v1.0.3
