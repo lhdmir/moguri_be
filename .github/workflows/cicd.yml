@@ -43,10 +43,10 @@ jobs:
           port: 22
           script_stop: true
           script: |
-            echo "
+            echo '
             #!/bin/bash
             pgrep -f app.jar | xargs -r kill -9
             nohup java -jar ${{ secrets.REMOTE_PATH }}/app.jar --spring.profiles.active=prod > ${{ secrets.REMOTE_PATH }}/app.log 2>&1 &
-            " > ${{ secrets.REMOTE_PATH }}/deploy.sh
+            ' > ${{ secrets.REMOTE_PATH }}/deploy.sh
             chmod +x ${{ secrets.REMOTE_PATH }}/deploy.sh
             ${{ secrets.REMOTE_PATH }}/deploy.sh
