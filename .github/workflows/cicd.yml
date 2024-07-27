@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [ closed ]
+    types: [closed]
 
 jobs:
   build:
@@ -18,8 +18,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
@@ -35,31 +35,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "${SSH_PRIVATE_KEY//\\n/$'\n'}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          
+
+          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "pgrep -f app.jar | xargs -r kill -9"
+
           scp -o StrictHostKeyChecking=no target/*.jar $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/app.jar
-          
-          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            # Create log file with the appropriate permissions
-            touch $REMOTE_PATH/app.log
-            chmod 666 $REMOTE_PATH/app.log
-          
-            # Graceful shutdown of existing application
-            APP_PID=$(pgrep -f app.jar)
-            if [ -n "$APP_PID" ]; then
-              kill -15 $APP_PID
-              # Wait for the process to terminate
-              sleep 10
-            fi
-          
-            # Start new application
-            nohup java -jar $REMOTE_PATH/app.jar --spring.profiles.active=prod > $REMOTE_PATH/app.log 2>&1 &
-          
-            # Health check
-            sleep 10
-            if pgrep -f app.jar > /dev/null; then
-              echo "Deployment succeeded."
-            else
-              echo "Deployment failed."
-              exit 1
-            fi
-          EOF
+
+          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "nohup java -jar $REMOTE_PATH/app.jar --spring.profiles.active=prod > $REMOTE_PATH/app.log 2>&1 &"
