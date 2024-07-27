@@ -37,8 +37,18 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           
           scp -o StrictHostKeyChecking=no target/*.jar $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/app.jar
-          
-          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << 'EOF'
-            pgrep -f app.jar | xargs -r kill -9
-            nohup java -jar $REMOTE_PATH/app.jar --spring.profiles.active=prod > $REMOTE_PATH/app.log 2>&1 &
+
+          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << EOF
+            mkdir -p ${REMOTE_PATH}
+            echo 'pgrep -f app.jar | xargs -r kill -9' > ${REMOTE_PATH}/deploy.sh
+            echo 'nohup java -jar ${REMOTE_PATH}/app.jar --spring.profiles.active=prod > ${REMOTE_PATH}/app.log 2>&1 &' >> ${REMOTE_PATH}/deploy.sh
+            chmod +x ${REMOTE_PATH}/deploy.sh
+            ${REMOTE_PATH}/deploy.sh
+          EOF
+
+      - name: Check deployment status
+        run: |
+          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << EOF
+            sleep 5
+            tail -n 20 ${REMOTE_PATH}/app.log
           EOF
