@@ -46,9 +46,4 @@ jobs:
             ${REMOTE_PATH}/deploy.sh
           EOF
 
-      - name: Check deployment status
-        run: |
-          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << EOF
-            sleep 5
-            tail -n 20 ${REMOTE_PATH}/app.log
-          EOF
+    
