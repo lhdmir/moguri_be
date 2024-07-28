@@ -40,6 +40,5 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << 'EOF'
             pgrep -f app.jar | xargs -r kill -9
-            nohup java -jar $REMOTE_PATH/app.jar --spring.profiles.active=prod > $REMOTE_PATH/app.log 2>&1 &
+            $REMOTE_PATH/run.sh
           EOF
-          
