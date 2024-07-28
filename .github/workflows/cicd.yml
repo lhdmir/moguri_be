@@ -40,5 +40,5 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << 'EOF'
             pgrep -f app.jar | xargs -r kill -9
-            $REMOTE_PATH/run.sh
+            /home/ubuntu/app/run.sh
           EOF
