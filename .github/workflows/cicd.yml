@@ -30,24 +30,15 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+          REMOTE_PATH: /home/${{ secrets.REMOTE_USER }}/app
         run: |
           mkdir -p ~/.ssh
           echo "${SSH_PRIVATE_KEY//\\n/$'\n'}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          
-          scp -o StrictHostKeyChecking=no target/*.jar $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/app.jar
-          
 
-      - name: SSH to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script_stop: true
-          script: |
-            sudo apt-get update
-            sudo apt-get install -y tmux
-            tmux new-session -d -s deploy_session 'pgrep -f app.jar | xargs -r kill -9; nohup java -jar ${{ secrets.REMOTE_PATH }}/app.jar --spring.profiles.active=prod > ${{ secrets.REMOTE_PATH }}/app.log 2>&1 &'
+          scp -o StrictHostKeyChecking=no target/*.jar $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/app.jar
+
+          ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST << 'EOF'
+            pgrep -f app.jar | xargs -r kill -9
+            nohup java -jar $REMOTE_PATH/app.jar --spring.profiles.active=prod > $REMOTE_PATH/app.log 2>&1 &
+          EOF
