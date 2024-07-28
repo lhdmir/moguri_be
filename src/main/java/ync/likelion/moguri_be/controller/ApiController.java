@@ -22,6 +22,11 @@ public class ApiController {
         return "Hello World!";
     }
 
+    @GetMapping("/success")
+    public String success() {
+        return "Success!";
+    }
+
     @GetMapping("/dbtest")
     public List<TestTable> dbTest() {
         return testTableRepository.findAll();
