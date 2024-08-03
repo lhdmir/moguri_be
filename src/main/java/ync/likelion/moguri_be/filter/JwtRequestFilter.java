@@ -1,10 +1,13 @@
 package ync.likelion.moguri_be.filter;
 
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +21,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
@@ -27,7 +32,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService; // 사용자 정보를 로드하는 서비스
 
-    private final String SECRET_KEY = "your_secret_key"; // JWT 비밀 키
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    private SecretKey SECRET_KEY;
+
+    @PostConstruct
+    public void init() {
+        byte[] decodedKey = Base64.getDecoder().decode(secretKey);
+        SECRET_KEY = Keys.hmacShaKeyFor(decodedKey);
+//        SECRET_KEY = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
+//    private final String SECRET_KEY = "your_secret_key"; // JWT 비밀 키
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -87,3 +105,4 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return claims.getExpiration().before(new Date()); // 만료 여부 확인
     }
 }
+
