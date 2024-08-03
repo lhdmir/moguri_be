@@ -7,15 +7,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ync.likelion.moguri_be.dto.UserDto;
 import ync.likelion.moguri_be.dto.TodayMeal;
-import ync.likelion.moguri_be.model.TodayBreakfast;
-import ync.likelion.moguri_be.model.TodayDinner;
-import ync.likelion.moguri_be.model.TodayLunch;
-import ync.likelion.moguri_be.model.User;
-import ync.likelion.moguri_be.repository.TodayBreakfastRepository;
-import ync.likelion.moguri_be.repository.TodayDinnerRepository;
-import ync.likelion.moguri_be.repository.TodayLunchRepository;
-import ync.likelion.moguri_be.repository.UserRepository;
+import ync.likelion.moguri_be.model.*;
+import ync.likelion.moguri_be.repository.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,27 +21,39 @@ public class UserService {
     private final TodayLunchRepository todayLunchRepository;
     private final TodayDinnerRepository todayDinnerRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    
+    private final TodayExerciseRepository todayExerciseRepository;
 
     @Autowired
     public UserService(UserRepository userRepository,
                        TodayBreakfastRepository todayBreakfastRepository,
                        TodayLunchRepository todayLunchRepository,
                        TodayDinnerRepository todayDinnerRepository,
-                       BCryptPasswordEncoder passwordEncoder) {
+                       BCryptPasswordEncoder passwordEncoder, TodayExerciseRepository todayExerciseRepository) {
         this.userRepository = userRepository;
         this.todayBreakfastRepository = todayBreakfastRepository;
         this.todayLunchRepository = todayLunchRepository;
         this.todayDinnerRepository = todayDinnerRepository;
         this.passwordEncoder = passwordEncoder;
+        this.todayExerciseRepository = todayExerciseRepository;
     }
 
-    // 사용자 저장
+    // 사용자 저장 또는 업데이트
     public void save(UserDto userDto) {
-        User user = new User();
+        // 사용자 이름으로 기존 사용자 조회
+        User user = userRepository.findByUsername(userDto.getUsername())
+                .orElse(new User()); // 사용자가 없으면 새 User 객체 생성
+
+        // 사용자 정보 업데이트
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword())); // 비밀번호 암호화
-        userRepository.save(user);
+        // 비밀번호는 필요할 때만 업데이트
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword())); // 비밀번호 암호화
+        }
+        user.setTargetWeight(userDto.getTargetWeight());
+
+        userRepository.save(user); // 사용자 저장
     }
 
     // 사용자 이름으로 사용자 조회
@@ -64,7 +71,6 @@ public class UserService {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
-
     // 오늘의 식사 정보 조회
     public TodayMeal getTodayMeal(int userId) {
         TodayBreakfast breakfast = todayBreakfastRepository.findByUserId(userId);
@@ -81,5 +87,9 @@ public class UserService {
             // 인증 정보를 무효화합니다.
             SecurityContextHolder.clearContext();
         }
+    }
+
+    public List<TodayExercise> getTodayExercises(int userId) {
+        return todayExerciseRepository.findByUserId(userId);
     }
 }
