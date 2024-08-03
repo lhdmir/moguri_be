@@ -9,7 +9,7 @@ import lombok.Data;
 public class AccessoryCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     @Column(name = "name", nullable = false, length = 20)
     private String name;

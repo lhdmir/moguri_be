@@ -30,7 +30,7 @@ public class JwtUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SECRET_KEY) // 변경된 부분
+                .signWith(SECRET_KEY)
                 .compact();
     }
 

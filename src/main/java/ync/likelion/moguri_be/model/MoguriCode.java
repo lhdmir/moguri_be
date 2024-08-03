@@ -9,7 +9,7 @@ import lombok.Data;
 public class MoguriCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;

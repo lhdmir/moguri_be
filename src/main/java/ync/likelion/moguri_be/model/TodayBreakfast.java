@@ -9,7 +9,7 @@ import lombok.Data;
 public class TodayBreakfast {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -15,17 +15,7 @@ import java.util.List;
 public class LoginResponse {
     private String token; // JWT 토큰
     private Date cookieExpirationTime; // 쿠키 만료 시간
-    private String username; // 사용자 이름
-    private String email; // 사용자 이메일
     private Moguri moguri; // Moguri 객체
     private TodayMeal todayMeal; // 오늘의 식사 정보
     private List<TodayExercise> todayExercise; // 오늘의 운동 정보
-
-    public LoginResponse(String token, Date cookieExpirationTime, Moguri moguri, TodayMeal todayMeal, List<TodayExercise> todayExercise) {
-        this.token = token;
-        this.cookieExpirationTime = cookieExpirationTime;
-        this.moguri = moguri;
-        this.todayMeal = todayMeal;
-        this.todayExercise = todayExercise;
-    }
 }
