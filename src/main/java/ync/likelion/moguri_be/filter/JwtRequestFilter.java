@@ -19,12 +19,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -38,6 +39,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private SecretKey SECRET_KEY;
 
+    private static final List<String> WHITELISTED_PATHS = Arrays.asList(
+            "/swagger-ui.html", "/swagger-ui/", "/v3/api-docs/", "/swagger-resources/**", "/webjars/**"
+    );
     @PostConstruct
     public void init() {
         byte[] decodedKey = Base64.getDecoder().decode(secretKey);
@@ -51,6 +55,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         final String authorizationHeader = request.getHeader("Authorization");
+
+        String path = request.getRequestURI();
+
+        // Swagger 관련 경로는 필터링을 스킵
+        if (WHITELISTED_PATHS.stream().anyMatch(path::startsWith)) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         String username = null;
         String jwt = null;
