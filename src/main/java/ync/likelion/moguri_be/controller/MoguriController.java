@@ -1,5 +1,9 @@
 package ync.likelion.moguri_be.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +32,16 @@ public class MoguriController {
         this.moguriRepository = moguriRepository;
     }
 
+    @Operation(summary = "모구리 생성", description = "사용자가 새로운 모구리를 생성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "모구리 생성 성공"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 모구리 이름입니다."),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.")
+    })
     @PostMapping
-    public ResponseEntity<Object> createMoguri(@RequestBody MoguriDto moguriDto) {
+    public ResponseEntity<Object> createMoguri(
+            @Parameter(description = "Authorization 헤더", required = true) @RequestHeader("Authorization") String authorization,
+            @RequestBody MoguriDto moguriDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName(); // 토큰에서 사용자 이름 추출
         System.out.println(username);
