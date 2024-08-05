@@ -75,10 +75,10 @@ public class UserService {
 
     // 오늘의 식사 정보 조회
     public TodayMeal getTodayMeal(int userId) {
-        TodayBreakfast breakfast = todayBreakfastRepository.findByUserId(userId);
-        TodayLunch lunch = todayLunchRepository.findByUserId(userId);
-        TodayDinner dinner = todayDinnerRepository.findByUserId(userId);
-        TodaySnack snack = todaySnackRepository.findByUserId(userId);
+        List<TodayBreakfast> breakfast = todayBreakfastRepository.findByUserId(userId);
+        List<TodayLunch> lunch = todayLunchRepository.findByUserId(userId);
+        List<TodayDinner> dinner = todayDinnerRepository.findByUserId(userId);
+        List<TodaySnack> snack = todaySnackRepository.findByUserId(userId);
         return new TodayMeal(breakfast, lunch, dinner,snack);
     }
 

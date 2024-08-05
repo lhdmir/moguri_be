@@ -74,12 +74,10 @@ public class MoguriController {
         userDto.setUsername(username);
         userDto.setEmail(user.getEmail()); // 기존 이메일 설정
         userDto.setTargetWeight(moguriDto.getTargetWeight());
+        userService.save(userDto); // 사용자 정보를 저장
 
         existingMoguri.setMoguriCode(moguriCode);
         existingMoguri.setName(moguriDto.getName());
-
-
-        userService.save(userDto); // 사용자 정보를 저장
 
         moguriRepository.save(existingMoguri); // 모구리 저장
 

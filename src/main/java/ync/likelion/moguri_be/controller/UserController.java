@@ -137,9 +137,6 @@ public class UserController {
                 loginMoguri.setId(moguriCode.getId()); // 모구리 코드 설정
                 loginMoguri.setImageUrl(moguriCode.getImageUrl()); // 모구리 이미지 URL 설정
             }
-            loginMoguri.setName(moguri.getName()); // 모구리 이름 설정
-            loginMoguri.setName(moguri.getName()); // 모구리 이름 설정
-
             // CurrentItem 설정
             LoginMoguri.CurrentItem currentItem = new LoginMoguri.CurrentItem();
             currentItem.setAccessory(moguri.getCurrentAccessory()); // 액세서리 설정
