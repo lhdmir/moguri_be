@@ -27,11 +27,11 @@ public class Moguri {
     @Column(name = "name", length = 15)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "current_accessory_id")
     private AccessoryCode currentAccessory; // 현재 액세서리
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "current_background_id")
     private BackgroundCode currentBackground; // 현재 배경
 }
