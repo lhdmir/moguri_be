@@ -37,11 +37,11 @@ public interface MoguriRepository extends JpaRepository<Moguri, Integer> {
 
     // 액세서리 해제
     @Modifying
-    @Query("UPDATE Moguri m SET m.currentAccessory = null WHERE m.user = ?1 AND m.currentAccessory = ?2")
+    @Query("UPDATE Moguri m SET m.currentAccessory.id = 0 WHERE m.user = ?1 AND m.currentAccessory = ?2")
     void unequipAccessory(User user, AccessoryCode accessory);
 
     // 배경화면 해제
     @Modifying
-    @Query("UPDATE Moguri m SET m.currentBackground = null WHERE m.user = ?1 AND m.currentBackground = ?2")
+    @Query("UPDATE Moguri m SET m.currentBackground.id = 0 WHERE m.user = ?1 AND m.currentBackground = ?2")
     void unequipBackground(User user, BackgroundCode background);
 }

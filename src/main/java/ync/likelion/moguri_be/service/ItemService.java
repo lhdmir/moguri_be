@@ -49,13 +49,18 @@ public class ItemService {
 
     // 모든 아이템 목록을 가져오는 메서드
     public List<AccessoryCode> getAllAccessoryItems() {
-        return accessoryCodeRepository.findAll();
+        return accessoryCodeRepository.findAll()
+                .stream()
+                .filter(item -> item.getId() != 0) // id가 0인 아이템 제외
+                .collect(Collectors.toList());
     }
 
     public List<BackgroundCode> getAllBackgroundItems() {
-        return backgroundCodeRepository.findAll();
+        return backgroundCodeRepository.findAll()
+                .stream()
+                .filter(item -> item.getId() != 0) // id가 0인 아이템 제외
+                .collect(Collectors.toList());
     }
-
     // 랜덤 아이템 선택하는 메서드
     public AccessoryCode drawRandomAccessoryItem(List<AccessoryCode> userItems) {
         List<AccessoryCode> allItems = getAllAccessoryItems();
