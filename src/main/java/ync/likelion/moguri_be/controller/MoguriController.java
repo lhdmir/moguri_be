@@ -234,6 +234,7 @@ public class MoguriController {
     }
 
     // 악세서리 착용/해제 엔드포인트
+    // 악세서리 착용/해제 엔드포인트
     @Operation(summary = "액세서리 착용 또는 해제", description = "사용자가 액세서리를 착용하거나 해제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "액세서리 착용/해제 성공"),
@@ -272,12 +273,22 @@ public class MoguriController {
             ));
         }
 
-        // 아이템 착용 해제
-        if (currentAccessory != null) {
-            itemService.unequipAccessory(user, currentAccessory);
+        // 현재 착용된 액세서리가 없는 경우
+        if (currentAccessory == null || currentAccessory.getId() == 0) {
+            itemService.equipAccessory(user, requestedAccessory);
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Accessory equipped successfully",
+                    "accessory", Map.of(
+                            "id", requestedAccessory.getId(),
+                            "name", requestedAccessory.getName(),
+                            "imageUrl", requestedAccessory.getImageUrl()
+                    ),
+                    "current_equipped_accessory", requestedAccessory.getId()
+            ));
         }
 
-        // 아이템 착용
+        // 현재 착용된 액세서리가 있는 경우, 기존 액세서리를 해제하고 새로운 액세서리를 착용
+        itemService.unequipAccessory(user, currentAccessory);
         itemService.equipAccessory(user, requestedAccessory);
 
         return ResponseEntity.ok().body(Map.of(
@@ -290,6 +301,7 @@ public class MoguriController {
                 "current_equipped_accessory", requestedAccessory.getId()
         ));
     }
+
 
     // 배경화면 설정/해제 엔드포인트
     @Operation(summary = "배경화면 설정 또는 해제", description = "사용자가 배경화면을 설정하거나 해제합니다.")

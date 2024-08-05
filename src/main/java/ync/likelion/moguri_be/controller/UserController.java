@@ -38,6 +38,8 @@ public class UserController {
     private OwnedBackgroundRepository ownedBackgroundRepository;
     @Autowired
     private BackgroundCodeRepository backgroundCodeRepository;
+    @Autowired
+    private AccessoryCodeRepository accessoryCodeRepository;
 
     private static final List<String> MOGURI_CODES = List.of(
         "https://moguri.site/image/moguri_1-1.png",
@@ -82,10 +84,14 @@ public class UserController {
         ownedBackground.setUser(user);
         ownedBackground.setBackgroundCode(backgroundCodeRepository.getReferenceById(201));
         ownedBackgroundRepository.save(ownedBackground);
+        OwnedAccessories ownedAccessories = new OwnedAccessories();
+        ownedAccessories.setUser(user);
+        ownedAccessories.setAccessoryCode(accessoryCodeRepository.getReferenceById(0));
+        moguri.setCurrentAccessory(accessoryCodeRepository.getReferenceById(0));
         moguri.setCurrentBackground(backgroundCodeRepository.getReferenceById(201));
         moguri.setUser(user); // 사용자 ID 설정
         moguri.setMoguriCode(getMoguriCodeId(randomMoguriCode)); // 랜덤 모구리 코드 설정
-
+//        ownedAccessoriesRepository.save(ownedAccessories);
         moguriRepository.save(moguri); // 모구리 저장
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseMessage("회원가입에 성공했습니다."));
 
@@ -139,6 +145,7 @@ public class UserController {
             currentItem.setAccessory(moguri.getCurrentAccessory()); // 액세서리 설정
             currentItem.setBackground(moguri.getCurrentBackground()); // 배경 설정
             loginMoguri.setCurrentItem(currentItem);
+
             OwnedItems ownedItems = new OwnedItems();
 
             // 액세서리 조회
