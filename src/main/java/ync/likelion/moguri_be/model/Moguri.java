@@ -1,6 +1,8 @@
 package ync.likelion.moguri_be.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -11,18 +13,19 @@ public class Moguri {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
+    @NotNull
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // User와의 관계
 
-    @ManyToOne
+    @NotNull
+    @OneToOne
     @JoinColumn(name = "moguri_code_id", nullable = false)
     private MoguriCode moguriCode; // MoguriCode와의 관계
 
-
-    @Column(name = "name", nullable = false, length = 30)
+    @Size(max = 15) // 길이 제한 추가
+    @Column(name = "name", length = 15)
     private String name;
-
 
     @ManyToOne
     @JoinColumn(name = "current_accessory_id")

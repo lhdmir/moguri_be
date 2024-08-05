@@ -39,7 +39,7 @@ public class UserService {
     }
 
     // 사용자 저장 또는 업데이트
-    public void save(UserDto userDto) {
+    public User save(UserDto userDto) {
         // 사용자 이름으로 기존 사용자 조회
         User user = userRepository.findByUsername(userDto.getUsername())
                 .orElse(new User()); // 사용자가 없으면 새 User 객체 생성
@@ -54,6 +54,7 @@ public class UserService {
         user.setTargetWeight(userDto.getTargetWeight());
 
         userRepository.save(user); // 사용자 저장
+        return user;
     }
 
     // 사용자 이름으로 사용자 조회
