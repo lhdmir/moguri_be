@@ -12,12 +12,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ync.likelion.moguri_be.dto.*;
-import ync.likelion.moguri_be.model.Moguri;
-import ync.likelion.moguri_be.model.MoguriCode;
-import ync.likelion.moguri_be.model.User;
+import ync.likelion.moguri_be.model.*;
 import ync.likelion.moguri_be.repository.MoguriCodeRepository;
 import ync.likelion.moguri_be.repository.MoguriRepository;
+import ync.likelion.moguri_be.service.ItemService;
 import ync.likelion.moguri_be.service.UserService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/moguri")
@@ -26,11 +29,14 @@ public class MoguriController {
     private final UserService userService;
     private final MoguriRepository moguriRepository;
     private final MoguriCodeRepository moguriCodeRepository;
+
+    private final ItemService itemService;
     @Autowired
-    public MoguriController(UserService userService, MoguriRepository moguriRepository, MoguriCodeRepository moguriCodeRepository) {
+    public MoguriController(UserService userService, MoguriRepository moguriRepository, MoguriCodeRepository moguriCodeRepository, ItemService itemService) {
         this.userService = userService;
         this.moguriRepository = moguriRepository;
         this.moguriCodeRepository = moguriCodeRepository;
+        this.itemService = itemService;
     }
 
     @Operation(summary = "모구리 생성", description = "사용자가 새로운 모구리를 생성합니다.")
@@ -179,4 +185,158 @@ public class MoguriController {
                 .orElseThrow(() -> new RuntimeException("진화된 모구리 코드가 존재하지 않습니다.")); // 데이터베이스에서 찾기
     }
     // 추가적인 메서드 (모구리 조회, 업데이트 등)도 여기에 추가할 수 있습니다.
+    @Operation(summary = "사용자의 액세서리 목록 조회", description = "사용자의 액세서리 목록을 가져옵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "액세서리 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
+    @GetMapping("/accessory")
+    public ResponseEntity<Object> getUserAccessories(@RequestHeader("Authorization") String authorization) {
+        return getUserItems(authorization, true);
+    }
+    @Operation(summary = "사용자의 배경화면 목록 조회", description = "사용자의 배경화면 목록을 가져옵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "배경화면 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
+    @GetMapping("/background")
+    public ResponseEntity<Object> getUserBackgrounds(@RequestHeader("Authorization") String authorization) {
+        return getUserItems(authorization, false);
+    }
+
+    private ResponseEntity<Object> getUserItems(String authorization, boolean isAccessory) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        if (isAccessory) {
+            List<AccessoryCode> userAccessories = itemService.getUserAccessoryItems(user);
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Accessory retrieved successfully",
+                    "accessories", userAccessories.stream().map(accessory -> Map.of(
+                            "id", accessory.getId(),
+                            "name", accessory.getName(),
+                            "imageUrl", accessory.getImageUrl()
+                    )).collect(Collectors.toList())
+            ));
+        } else {
+            List<BackgroundCode> userBackgrounds = itemService.getUserBackgroundItems(user);
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Background retrieved successfully",
+                    "backgrounds", userBackgrounds.stream().map(background -> Map.of(
+                            "id", background.getId(),
+                            "name", background.getName(),
+                            "imageUrl", background.getImageUrl()
+                    )).collect(Collectors.toList())
+            ));
+        }
+    }
+
+    // 악세서리 착용/해제 엔드포인트
+    @Operation(summary = "액세서리 착용 또는 해제", description = "사용자가 액세서리를 착용하거나 해제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "액세서리 착용/해제 성공"),
+            @ApiResponse(responseCode = "404", description = "요청한 아이템을 찾을 수 없음")
+    })
+    @PutMapping("/accessory")
+    public ResponseEntity<Object> equipAccessory(@RequestBody AccessoryRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 현재 착용 중인 아이템 조회
+        AccessoryCode currentAccessory = itemService.getCurrentEquippedAccessory(user);
+
+        // 요청한 아이템 조회
+        AccessoryCode requestedAccessory = itemService.getAccessoryById(request.getAccessory().getId());
+
+        // 아이템이 존재하지 않는 경우
+        if (requestedAccessory == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "요청한 아이템을 찾을 수 없습니다."));
+        }
+
+        // 이미 착용 중인 아이템을 다시 착용하는 경우
+        if (currentAccessory != null && currentAccessory.getId() == requestedAccessory.getId()) {
+            // 아이템 해제
+            itemService.unequipAccessory(user, currentAccessory);
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Accessory unequipped successfully",
+                    "accessory", Map.of(
+                            "id", 0,
+                            "name", "",
+                            "imageUrl", ""
+                    ),
+                    "current_equipped_accessory", 0
+            ));
+        }
+
+        // 아이템 착용 해제
+        if (currentAccessory != null) {
+            itemService.unequipAccessory(user, currentAccessory);
+        }
+
+        // 아이템 착용
+        itemService.equipAccessory(user, requestedAccessory);
+
+        return ResponseEntity.ok().body(Map.of(
+                "message", "Accessory equipped successfully",
+                "accessory", Map.of(
+                        "id", requestedAccessory.getId(),
+                        "name", requestedAccessory.getName(),
+                        "imageUrl", requestedAccessory.getImageUrl()
+                ),
+                "current_equipped_accessory", requestedAccessory.getId()
+        ));
+    }
+
+    // 배경화면 설정/해제 엔드포인트
+    @Operation(summary = "배경화면 설정 또는 해제", description = "사용자가 배경화면을 설정하거나 해제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "배경화면 설정/해제 성공"),
+            @ApiResponse(responseCode = "404", description = "요청한 배경화면을 찾을 수 없음")
+    })
+    @PutMapping("/background")
+    public ResponseEntity<Object> setBackground(@RequestBody BackgroundRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 요청한 배경화면 조회
+        BackgroundCode requestedBackground = itemService.getBackgroundById(request.getBackground().getId());
+
+        // 배경화면이 존재하지 않는 경우
+        if (requestedBackground == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "요청한 배경화면을 찾을 수 없습니다."));
+        }
+
+        // 배경화면 설정 또는 해제 처리
+        BackgroundCode resultBackground = itemService.toggleBackground(user, requestedBackground);
+
+        if (resultBackground.getId() == 0) {
+            // 해제된 경우
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Background unequipped successfully",
+                    "background", Map.of(
+                            "id", 0,
+                            "name", "",
+                            "imageUrl", ""
+                    ),
+                    "current_equipped_background", 0
+            ));
+        }
+
+        // 설정된 경우
+        return ResponseEntity.ok().body(Map.of(
+                "message", "Background equipped successfully",
+                "background", Map.of(
+                        "id", resultBackground.getId(),
+                        "name", resultBackground.getName(),
+                        "imageUrl", resultBackground.getImageUrl()
+                ),
+                "current_eqipped_background", requestedBackground.getId()
+        ));
+    }
 }

@@ -11,26 +11,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ync.likelion.moguri_be.dto.ErrorResponse;
-import ync.likelion.moguri_be.dto.LoginDto;
-import ync.likelion.moguri_be.dto.LoginResponse;
-import ync.likelion.moguri_be.dto.ResponseMessage;
-import ync.likelion.moguri_be.dto.TodayMeal;
-import ync.likelion.moguri_be.dto.UserDto;
-import ync.likelion.moguri_be.model.Moguri;
-import ync.likelion.moguri_be.model.TodayExercise;
-import ync.likelion.moguri_be.model.User;
-import ync.likelion.moguri_be.repository.MoguriCodeRepository;
-import ync.likelion.moguri_be.repository.MoguriRepository;
-import ync.likelion.moguri_be.repository.UserRepository;
+import ync.likelion.moguri_be.dto.*;
+import ync.likelion.moguri_be.model.*;
+import ync.likelion.moguri_be.repository.*;
 import ync.likelion.moguri_be.service.UserService;
 import ync.likelion.moguri_be.util.JwtUtil;
-import ync.likelion.moguri_be.model.MoguriCode;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
@@ -40,9 +27,14 @@ public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final MoguriRepository moguriRepository;
+    @Autowired
     private final UserRepository userRepository;
     @Autowired
     private MoguriCodeRepository moguriCodeRepository;
+    @Autowired
+    private OwnedAccessoriesRepository ownedAccessoriesRepository;
+    @Autowired
+    private OwnedBackgroundRepository ownedBackgroundRepository;
 
     private static final List<String> MOGURI_CODES = List.of(
             "http://158.180.71.193/image/moguri_1-1.png",
@@ -123,8 +115,35 @@ public class UserController {
             List<TodayExercise> todayExercise = userService.getTodayExercises(user.getId());
 
             Moguri moguri = moguriRepository.findByUser(user).orElse(new Moguri());
+            System.out.println("userId:" + user.getId());
 
-            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, moguri, todayMeal, todayExercise);
+            OwnedItems ownedItems = new OwnedItems();
+
+            // 액세서리 조회
+            List<OwnedItems.AccessoryCode> accessoryCodes = new ArrayList<>();
+            List<OwnedAccessories> accessories = ownedAccessoriesRepository.findByUser(user);
+            for (OwnedAccessories accessory : accessories) {
+                OwnedItems.AccessoryCode accessoryCode = new OwnedItems.AccessoryCode();
+                accessoryCode.setId(accessory.getAccessoryCode().getId());
+                accessoryCode.setName(accessory.getAccessoryCode().getName());
+                accessoryCode.setImageUrl(accessory.getAccessoryCode().getImageUrl());
+                accessoryCodes.add(accessoryCode);
+            }
+            ownedItems.setAccessory(accessoryCodes); // 액세서리 리스트 설정
+
+            // 배경 조회
+            List<OwnedItems.BackgroundCode> backgroundCodes = new ArrayList<>();
+            List<OwnedBackground> backgrounds = ownedBackgroundRepository.findByUser(user);
+            for (OwnedBackground background : backgrounds) {
+                OwnedItems.BackgroundCode backgroundCode = new OwnedItems.BackgroundCode();
+                backgroundCode.setId(background.getBackgroundCode().getId());
+                backgroundCode.setName(background.getBackgroundCode().getName());
+                backgroundCode.setImageUrl(background.getBackgroundCode().getImageUrl());
+                backgroundCodes.add(backgroundCode);
+            }
+            ownedItems.setBackground(backgroundCodes); // 배경 리스트 설정
+
+            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, moguri, ownedItems, todayMeal, todayExercise);
             return ResponseEntity.ok(loginResponse);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("ID 또는 PW가 잘못되었습니다."));

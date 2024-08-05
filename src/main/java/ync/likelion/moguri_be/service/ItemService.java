@@ -1,5 +1,6 @@
 package ync.likelion.moguri_be.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ync.likelion.moguri_be.model.BackgroundCode;
@@ -7,10 +8,7 @@ import ync.likelion.moguri_be.model.AccessoryCode;
 import ync.likelion.moguri_be.model.OwnedBackground;
 import ync.likelion.moguri_be.model.OwnedAccessories;
 import ync.likelion.moguri_be.model.User;
-import ync.likelion.moguri_be.repository.BackgroundCodeRepository;
-import ync.likelion.moguri_be.repository.AccessoryCodeRepository;
-import ync.likelion.moguri_be.repository.OwnedBackgroundRepository;
-import ync.likelion.moguri_be.repository.OwnedAccessoriesRepository;
+import ync.likelion.moguri_be.repository.*;
 
 import java.util.List;
 import java.util.Random;
@@ -30,6 +28,9 @@ public class ItemService {
 
     @Autowired
     private OwnedBackgroundRepository ownedBackgroundRepository;
+
+    @Autowired
+    private MoguriRepository moguriRepository;
 
     // 사용자가 보유한 아이템 목록을 가져오는 메서드
     public List<AccessoryCode> getUserAccessoryItems(User user) {
@@ -92,5 +93,64 @@ public class ItemService {
         ownedBackground.setUser(new User(userId));
         ownedBackground.setBackgroundCode(item);
         ownedBackgroundRepository.save(ownedBackground);
+    }
+
+
+
+    public AccessoryCode getCurrentEquippedAccessory(User user) {
+        // 현재 착용 중인 아이템을 반환하는 로직
+        return moguriRepository.findEquippedAccessoryByUser(user).orElse(null);
+    }
+
+    public AccessoryCode getAccessoryById(int accessoryId) {
+        // 액세서리 ID로 액세서리 조회 (AccessoryRepository 필요)
+        return accessoryCodeRepository.findById(accessoryId).orElse(null);
+    }
+
+    @Transactional
+    public void equipAccessory(User user, AccessoryCode accessory) {
+        // 아이템 착용 로직
+        moguriRepository.equipAccessory(user, accessory);
+    }
+
+    @Transactional
+    public void unequipAccessory(User user, AccessoryCode accessory) {
+        // 아이템 해제 로직
+        moguriRepository.unequipAccessory(user, accessory);
+    }
+    public BackgroundCode getCurrentEquippedBackground(User user) {
+        // 현재 착용 중인 배경화면을 반환하는 로직
+        return moguriRepository.findEquippedBackgroundByUser(user).orElse(null);
+    }
+
+    public BackgroundCode getBackgroundById(int backgroundId) {
+        // 배경화면 ID로 배경화면 조회
+        return backgroundCodeRepository.findById(backgroundId).orElse(null);
+    }
+
+    @Transactional
+    public void equipBackground(User user, BackgroundCode background) {
+        // 배경화면 착용 로직
+        moguriRepository.equipBackground(user, background);
+    }
+
+    @Transactional
+    public void unequipBackground(User user, BackgroundCode background) {
+        // 배경화면 해제 로직
+        moguriRepository.unequipBackground(user, background);
+    }
+
+    // 배경화면을 설정 또는 해제하는 메서드
+    @Transactional
+    public BackgroundCode toggleBackground(User user, BackgroundCode backgroundCode) {
+        BackgroundCode currentBackground = getCurrentEquippedBackground(user);
+
+        if (currentBackground != null && currentBackground.getId() == backgroundCode.getId()) {
+            unequipBackground(user, backgroundCode);
+            return new BackgroundCode(0, "", ""); // 해제된 경우 빈 배경화면 반환
+        }
+
+        equipBackground(user, backgroundCode);
+        return backgroundCode; // 설정된 배경화면 반환
     }
 }
