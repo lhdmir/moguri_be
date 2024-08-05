@@ -1,9 +1,13 @@
 package ync.likelion.moguri_be.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "background_codes")
 public class BackgroundCode {
@@ -16,4 +20,6 @@ public class BackgroundCode {
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
+
+
 }

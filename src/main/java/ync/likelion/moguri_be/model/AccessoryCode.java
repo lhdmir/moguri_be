@@ -1,9 +1,13 @@
 package ync.likelion.moguri_be.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "accessory_codes")
 public class AccessoryCode {
