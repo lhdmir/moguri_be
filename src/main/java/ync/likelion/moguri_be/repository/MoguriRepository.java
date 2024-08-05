@@ -10,4 +10,6 @@ public interface MoguriRepository extends JpaRepository<Moguri, Integer> {
     boolean existsByNameAndUser(String name, User user);
 
     Optional<Moguri> findByUser(User user);
+
+    boolean existsByName(String name);
 }
