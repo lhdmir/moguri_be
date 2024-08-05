@@ -3,6 +3,7 @@ package ync.likelion.moguri_be.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,14 +36,16 @@ public class UserController {
     private OwnedAccessoriesRepository ownedAccessoriesRepository;
     @Autowired
     private OwnedBackgroundRepository ownedBackgroundRepository;
+    @Autowired
+    private BackgroundCodeRepository backgroundCodeRepository;
 
     private static final List<String> MOGURI_CODES = List.of(
-            "http://158.180.71.193/image/moguri_1-1.png",
-            "http://158.180.71.193/image/moguri_2-1.png",
-            "http://158.180.71.193/image/moguri_3-1.png",
-            "http://158.180.71.193/image/moguri_4-1.png",
-            "http://158.180.71.193/image/moguri_5-1.png",
-            "http://158.180.71.193/image/moguri_6-1.png"
+        "https://moguri.site/image/moguri_1-1.png",
+        "https://moguri.site/image/moguri_2-1.png",
+        "https://moguri.site/image/moguri_3-1.png",
+        "https://moguri.site/image/moguri_4-1.png",
+        "https://moguri.site/image/moguri_5-1.png",
+        "https://moguri.site/image/moguri_6-1.png"
     );
     @Autowired
     public UserController(UserService userService, JwtUtil jwtUtil, MoguriRepository moguriRepository, UserRepository userRepository) {
@@ -57,6 +60,7 @@ public class UserController {
             @ApiResponse(responseCode = "201", description = "회원가입 성공"),
             @ApiResponse(responseCode = "409", description = "사용할 수 없는 ID 또는 Email")
     })
+    @Transactional
     @PostMapping("/register")
     public ResponseEntity<Object> registerUser(@Valid @RequestBody UserDto userDto) {
         // 사용자 이름 중복 체크
@@ -74,6 +78,11 @@ public class UserController {
         // 랜덤 모구리 코드 부여
         String randomMoguriCode = getRandomMoguriCode();
         Moguri moguri = new Moguri();
+        OwnedBackground ownedBackground= new OwnedBackground();
+        ownedBackground.setUser(user);
+        ownedBackground.setBackgroundCode(backgroundCodeRepository.getReferenceById(201));
+        ownedBackgroundRepository.save(ownedBackground);
+        moguri.setCurrentBackground(backgroundCodeRepository.getReferenceById(201));
         moguri.setUser(user); // 사용자 ID 설정
         moguri.setMoguriCode(getMoguriCodeId(randomMoguriCode)); // 랜덤 모구리 코드 설정
 
@@ -115,8 +124,21 @@ public class UserController {
             List<TodayExercise> todayExercise = userService.getTodayExercises(user.getId());
 
             Moguri moguri = moguriRepository.findByUser(user).orElse(new Moguri());
-            System.out.println("userId:" + user.getId());
+            LoginMoguri loginMoguri = new LoginMoguri();
+            // MoguriCode에서 코드와 이미지 경로 설정
+            MoguriCode moguriCode = moguri.getMoguriCode(); // 모구리 코드 가져오기
+            if (moguriCode != null) {
+                loginMoguri.setId(moguriCode.getId()); // 모구리 코드 설정
+                loginMoguri.setImageUrl(moguriCode.getImageUrl()); // 모구리 이미지 URL 설정
+            }
+            loginMoguri.setName(moguri.getName()); // 모구리 이름 설정
+            loginMoguri.setName(moguri.getName()); // 모구리 이름 설정
 
+            // CurrentItem 설정
+            LoginMoguri.CurrentItem currentItem = new LoginMoguri.CurrentItem();
+            currentItem.setAccessory(moguri.getCurrentAccessory()); // 액세서리 설정
+            currentItem.setBackground(moguri.getCurrentBackground()); // 배경 설정
+            loginMoguri.setCurrentItem(currentItem);
             OwnedItems ownedItems = new OwnedItems();
 
             // 액세서리 조회
@@ -143,7 +165,7 @@ public class UserController {
             }
             ownedItems.setBackground(backgroundCodes); // 배경 리스트 설정
 
-            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, moguri, ownedItems, todayMeal, todayExercise);
+            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, loginMoguri, ownedItems, todayMeal, todayExercise);
             return ResponseEntity.ok(loginResponse);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("ID 또는 PW가 잘못되었습니다."));

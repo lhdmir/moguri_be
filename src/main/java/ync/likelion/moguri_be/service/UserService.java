@@ -23,19 +23,20 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     
     private final TodayExerciseRepository todayExerciseRepository;
-
+    private final TodaySnackRepository todaySnackRepository;
     @Autowired
     public UserService(UserRepository userRepository,
                        TodayBreakfastRepository todayBreakfastRepository,
                        TodayLunchRepository todayLunchRepository,
                        TodayDinnerRepository todayDinnerRepository,
-                       BCryptPasswordEncoder passwordEncoder, TodayExerciseRepository todayExerciseRepository) {
+                       BCryptPasswordEncoder passwordEncoder, TodayExerciseRepository todayExerciseRepository, TodaySnackRepository todaySnackRepository) {
         this.userRepository = userRepository;
         this.todayBreakfastRepository = todayBreakfastRepository;
         this.todayLunchRepository = todayLunchRepository;
         this.todayDinnerRepository = todayDinnerRepository;
         this.passwordEncoder = passwordEncoder;
         this.todayExerciseRepository = todayExerciseRepository;
+        this.todaySnackRepository = todaySnackRepository;
     }
 
     // 사용자 저장 또는 업데이트
@@ -77,8 +78,8 @@ public class UserService {
         TodayBreakfast breakfast = todayBreakfastRepository.findByUserId(userId);
         TodayLunch lunch = todayLunchRepository.findByUserId(userId);
         TodayDinner dinner = todayDinnerRepository.findByUserId(userId);
-
-        return new TodayMeal(breakfast, lunch, dinner);
+        TodaySnack snack = todaySnackRepository.findByUserId(userId);
+        return new TodayMeal(breakfast, lunch, dinner,snack);
     }
 
     // 로그아웃 메서드
