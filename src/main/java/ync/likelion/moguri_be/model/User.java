@@ -30,4 +30,9 @@ public class User {
     private String password;
 
     private int targetWeight;
+
+    public User(int id) {
+        this.id = id;
+    }
+
 }

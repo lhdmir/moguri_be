@@ -56,8 +56,8 @@ public class MoguriController {
         // 해당 모구리에서 모구리 코드 가져오기
         MoguriCode moguriCode = existingMoguri.getMoguriCode();
         // 모구리 이름 중복 체크
-        if (existingMoguri.getName() != null && !existingMoguri.getName().isEmpty()) {
-            if (moguriRepository.existsByNameAndUser(moguriDto.getName(), user)) {
+        if (moguriDto.getName() != null && !moguriDto.getName().isEmpty()) {
+            if (moguriRepository.existsByName(moguriDto.getName())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("이미 존재하는 모구리 이름입니다."));
             }
         }
