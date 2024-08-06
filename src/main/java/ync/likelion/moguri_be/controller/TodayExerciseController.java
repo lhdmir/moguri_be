@@ -76,7 +76,7 @@ public class TodayExerciseController {
 
         TodayExercise createdExercise = exerciseService.saveExercise(todayExercise);
         TodayExerciseResponse todayExerciseResponse = new TodayExerciseResponse();
-        todayExerciseResponse.setId(user.getId());
+        todayExerciseResponse.setId(createdExercise.getId());
         todayExerciseResponse.setExerciseContent(todayExerciseDTO.getContent());
         return ResponseEntity.status(HttpStatus.CREATED).body(todayExerciseResponse);
     }

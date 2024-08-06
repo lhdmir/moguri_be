@@ -119,8 +119,9 @@ public class TodayLunchController {
             updatedResponse.setCalorie(updated.getCalorie());
 
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "식단 점심 리스트가 수정되었습니다.");
-            response.put("lunch", updatedResponse);
+            response.put("id", updated.getId());
+            response.put("menu", updated.getMenu());
+            response.put("calorie", updated.getCalorie());
 
             return ResponseEntity.ok(response);
         } else {
