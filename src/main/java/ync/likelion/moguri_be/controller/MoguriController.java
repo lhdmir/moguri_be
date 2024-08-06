@@ -247,7 +247,6 @@ public class MoguriController {
     }
 
     // 악세서리 착용/해제 엔드포인트
-    // 악세서리 착용/해제 엔드포인트
     @Operation(summary = "액세서리 착용 또는 해제", description = "사용자가 액세서리를 착용하거나 해제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "액세서리 착용/해제 성공"),

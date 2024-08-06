@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface TodayBreakfastRepository extends JpaRepository<TodayBreakfast, Integer> {
     List<TodayBreakfast> findByUserId(int userId);
+    List<TodayBreakfast> findAllByUserId(int userId);
 }

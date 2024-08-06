@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface TodayDinnerRepository extends JpaRepository<TodayDinner, Integer> {
     List<TodayDinner> findByUserId(int userId);
+    List<TodayDinner> findAllByUserId(int userId);
 }

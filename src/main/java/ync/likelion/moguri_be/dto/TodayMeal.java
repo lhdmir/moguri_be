@@ -13,6 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 public class TodayMeal {
     private List<TodayBreakfast> breakfast;
+//    @Data
+//    public static class Breakfast{
+//        private int id;
+//        private String menu;
+//        private int calorie;
+//    }
     private List<TodayLunch> lunch;
     private List<TodayDinner> dinner;
     private List<TodaySnack> snack;
