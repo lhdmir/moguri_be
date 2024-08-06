@@ -9,6 +9,7 @@ public class LoginMoguri {
     private String imageUrl;
     private String name;
     private CurrentItem currentItem;
+    private OwnedItems ownedItem;
     @Data
     public static class CurrentItem {
         private AccessoryCode accessory;
