@@ -137,6 +137,7 @@ public class UserController {
                 loginMoguri.setId(moguriCode.getId()); // 모구리 코드 설정
                 loginMoguri.setImageUrl(moguriCode.getImageUrl()); // 모구리 이미지 URL 설정
             }
+            loginMoguri.setName(moguri.getName());
             // CurrentItem 설정
             LoginMoguri.CurrentItem currentItem = new LoginMoguri.CurrentItem();
             currentItem.setAccessory(moguri.getCurrentAccessory()); // 액세서리 설정
@@ -169,7 +170,9 @@ public class UserController {
             }
             ownedItems.setBackground(backgroundCodes); // 배경 리스트 설정
 
-            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, loginMoguri, ownedItems, todayMeal, todayExercise);
+            loginMoguri.setOwnedItem(ownedItems);
+
+            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, loginMoguri, todayMeal, todayExercise);
             return ResponseEntity.ok(loginResponse);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("ID 또는 PW가 잘못되었습니다."));
