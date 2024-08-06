@@ -21,7 +21,7 @@ public class UserService {
     private final TodayLunchRepository todayLunchRepository;
     private final TodayDinnerRepository todayDinnerRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    
+
     private final TodayExerciseRepository todayExerciseRepository;
     private final TodaySnackRepository todaySnackRepository;
     @Autowired

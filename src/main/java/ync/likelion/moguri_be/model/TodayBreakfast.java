@@ -19,5 +19,5 @@ public class TodayBreakfast {
     private String menu;
 
     @Column(name = "calorie", nullable = false)
-    private Integer calorie;
+    private int calorie;
 }
