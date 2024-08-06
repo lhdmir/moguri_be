@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .cors(withDefaults()) // CORS 활성화
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/login/**", "/api/register").permitAll() // 로그인 관련 엔드포인트는 인증 없이 접근 가능
+                        .requestMatchers("/api/login/**", "/api/register").permitAll() // 로그인 및 회원가입 관련 엔드포인트는 인증 없이 접근 가능
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs/**", "/webjars/**").permitAll() // Swagger 관련 엔드포인트
                         .requestMatchers("/api/**").authenticated() // 나머지 /api/** 요청은 인증 필요
                         .anyRequest().authenticated()) // 그 외의 요청은 인증 필요
@@ -50,10 +50,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList( "https://lhdmir.github.io")); // 여기에 GitHub Pages URL 추가
+        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5173", "https://lhdmir.github.io", "https://www.moguri.site")); // 허용할 출처 설정
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
-        configuration.setExposedHeaders(List.of("x-auth-token"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Auth-Token"));
+        configuration.setExposedHeaders(List.of("X-Auth-Token"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
