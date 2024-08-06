@@ -121,13 +121,14 @@ public class TodayBreakfastController {
             TodayBreakfast updated = breakfastService.saveBreakfast(existingBreakfast);
 
             TodayMealResponse  updatedResponse= new TodayMealResponse();
-            updatedResponse.setId(updated.getId());
-            updatedResponse.setMenu(updated.getMenu());
-            updatedResponse.setCalorie(updated.getCalorie());
+//            updatedResponse.setId(updated.getId());
+//            updatedResponse.setMenu(updated.getMenu());
+//            updatedResponse.setCalorie(updated.getCalorie());
 
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "식단 아침 리스트가 수정되었습니다.");
-            response.put("breakfast", updatedResponse);
+            response.put("id", updated.getId());
+            response.put("menu", updated.getMenu());
+            response.put("calorie", updated.getCalorie());
 
             return ResponseEntity.ok(response);
         } else {
