@@ -38,6 +38,7 @@ public class UserService {
         this.todayExerciseRepository = todayExerciseRepository;
         this.todaySnackRepository = todaySnackRepository;
     }
+    
 
     // 사용자 저장 또는 업데이트
     public User save(UserDto userDto) {
