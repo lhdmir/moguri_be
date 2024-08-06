@@ -72,7 +72,7 @@ public class ItemController {
         if (isAccessory) {
             if (userAccessoryItems.size() >= allAccessoryItems.size()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Collections.singletonMap("error", "All items owned"));
+                        .body(Collections.singletonMap("error", "모든 악세서리를 보유중입니다 !"));
             }
 
             AccessoryCode drawnItem = itemService.drawRandomAccessoryItem(userAccessoryItems);
@@ -90,7 +90,7 @@ public class ItemController {
         } else {
             if (userBackgroundItems.size() >= allBackgroundItems.size()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Collections.singletonMap("error", "All items owned"));
+                        .body(Collections.singletonMap("error", "모든 배경화면을 보유 중입니다 !"));
             }
 
             BackgroundCode drawnItem = itemService.drawRandomBackgroundItem(userBackgroundItems);
