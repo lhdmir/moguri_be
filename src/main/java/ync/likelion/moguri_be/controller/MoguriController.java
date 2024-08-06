@@ -115,7 +115,7 @@ public class MoguriController {
         float targetWeight = user.getTargetWeight();
         String weightChangeMessage;
 
-        float weightDifference = targetWeight - weightDto.getWeight();
+        float weightDifference = weightDto.getWeight() - targetWeight;
         Moguri moguri = moguriRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("현재 모구리를 찾을 수 없습니다."));
 
