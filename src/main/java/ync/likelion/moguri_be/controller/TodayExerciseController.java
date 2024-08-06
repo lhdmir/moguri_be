@@ -130,8 +130,8 @@ public class TodayExerciseController {
 
         // 응답 생성
         Map<String, Object> response = new HashMap<>();
-        response.put("id", responseDto.getId());
-        response.put("content", responseDto.getExerciseContent());
+        response.put("id", updated.getId());
+        response.put("content", updated.getExerciseContent());
 
         return ResponseEntity.ok(response);
     }
