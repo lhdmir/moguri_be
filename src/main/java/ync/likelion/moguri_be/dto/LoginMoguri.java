@@ -10,6 +10,7 @@ public class LoginMoguri {
     private String name;
     private CurrentItem currentItem;
     private OwnedItems ownedItem;
+    private int targetWeight;
     @Data
     public static class CurrentItem {
         private AccessoryCode accessory;

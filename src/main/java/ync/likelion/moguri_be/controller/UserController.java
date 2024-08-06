@@ -171,6 +171,7 @@ public class UserController {
             ownedItems.setBackground(backgroundCodes); // 배경 리스트 설정
 
             loginMoguri.setOwnedItem(ownedItems);
+            loginMoguri.setTargetWeight(user.getTargetWeight());
 
             LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, loginMoguri, todayMeal, todayExercise);
             return ResponseEntity.ok(loginResponse);
