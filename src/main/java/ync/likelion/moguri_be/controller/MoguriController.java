@@ -107,6 +107,7 @@ public class MoguriController {
             return ResponseEntity.badRequest().body("유효하지 않은 몸무게 값입니다.");
         }
 
+        boolean isEvolved;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         User user = userService.findByUsername(username)
@@ -115,36 +116,36 @@ public class MoguriController {
         float targetWeight = user.getTargetWeight();
         String weightChangeMessage;
 
-        float weightDifference = targetWeight - weightDto.getWeight();
+        float weightDifference = weightDto.getWeight() - targetWeight;
         Moguri moguri = moguriRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("현재 모구리를 찾을 수 없습니다."));
 
         if (weightDifference <= 0) {
             weightChangeMessage = "축하합니다! 목표에 도달하셨네요!";
+            isEvolved = true;
 
-            // 모구리 코드 진화
-            MoguriCode evolvedMoguriCode = getEvolvedMoguriCode(moguri.getMoguriCode());
-            if (evolvedMoguriCode == null) {
-                throw new RuntimeException("진화된 모구리 코드가 존재하지 않습니다.");
-            }
-            moguri.setMoguriCode(evolvedMoguriCode); // 모구리 코드 설정
-
-            moguriRepository.save(moguri); // 모구리 저장
-            return ResponseEntity.status(HttpStatus.CREATED).body(createGrowResponse(weightChangeMessage, true, user, moguri, moguriCodeRepository));
         } else {
             weightChangeMessage = "목표까지 " + weightDifference + "kg 남았어요!";
-            return ResponseEntity.status(HttpStatus.CREATED).body(createGrowResponse(weightChangeMessage, false, user, moguri, moguriCodeRepository));
+            isEvolved = false;
         }
+        // 모구리 코드 진화
+        MoguriCode evolvedMoguriCode = getEvolvedMoguriCode(moguri.getMoguriCode(), isEvolved);
+        if (evolvedMoguriCode == null) {
+            throw new RuntimeException("진화된 모구리 코드가 존재하지 않습니다.");
+        }
+        moguri.setMoguriCode(evolvedMoguriCode); // 모구리 코드 설정
+        moguriRepository.save(moguri); // 모구리 저장
+        return ResponseEntity.status(HttpStatus.CREATED).body(createGrowResponse(weightChangeMessage, isEvolved, user, moguri));
     }
 
 
-    private GrowMoguriResponse createGrowResponse(String targetDifference, boolean isEvolved, User user, Moguri moguri, MoguriCodeRepository moguriCodeRepository) {
+    private GrowMoguriResponse createGrowResponse(String targetDifference, boolean isEvolved, User user, Moguri moguri) {
         // MoguriCode ID를 사용하여 MoguriCode 객체를 조회
         MoguriCode moguriCode = moguriCodeRepository.findById(moguri.getMoguriCode().getId())
                 .orElseThrow(() -> new RuntimeException("MoguriCode를 찾을 수 없습니다."));
 
         MoguriGrowDetailDto moguriGrowDetailDto = new MoguriGrowDetailDto(
-                moguri.getId(),
+                moguri.getMoguriCode().getId(),
                 moguriCode.getImageUrl(), // 이미지 URL을 가져옴
                 user.getTargetWeight() // 사용자에서 목표 몸무게 가져오기
         );
@@ -158,27 +159,41 @@ public class MoguriController {
     }
 
 
-    private MoguriCode getEvolvedMoguriCode(MoguriCode currentMoguriCode) {
+    private MoguriCode getEvolvedMoguriCode(MoguriCode currentMoguriCode, Boolean isEvolved ) {
         if (currentMoguriCode == null) {
             throw new IllegalArgumentException("현재 모구리 코드가 null입니다."); // null 체크
         }
 
         int currentId = currentMoguriCode.getId();
         int newId;
-
+        System.out.println(currentId);
         // 진화 로직: ID에 따라 새로운 ID 결정
-        switch (currentId) {
-            case 1 -> newId = 2; // 모구리 코드 1에서 2로 진화
-            case 3 -> newId = 4;
-            case 5 -> newId = 6;
-            case 7 -> newId = 8;
-            case 9 -> newId = 10;
-            case 11 -> newId = 12;
-            default -> {
-                return currentMoguriCode; // 진화하지 않음
+        if (isEvolved) {
+            switch (currentId) {
+                case 1 -> newId = 2; // 모구리 코드 1에서 2로 진화
+                case 3 -> newId = 4;
+                case 5 -> newId = 6;
+                case 7 -> newId = 8;
+                case 9 -> newId = 10;
+                case 11 -> newId = 12;
+                default -> {
+                    return currentMoguriCode; // 진화하지 않음
+                }
+            }
+        } else{
+            switch (currentId) {
+                case 2 -> newId = 1; // 모구리 코드 1에서 2로 진화
+                case 4 -> newId = 3;
+                case 6 -> newId = 5;
+                case 8 -> newId = 7;
+                case 10 -> newId = 9;
+                case 12 -> newId = 11;
+                default -> {
+                    return currentMoguriCode; // 진화하지 않음
+                }
             }
         }
-        // 새로운 MoguriCode를 데이터베이스에서 조회
+
         return moguriCodeRepository.findById(newId)
                 .orElseThrow(() -> new RuntimeException("진화된 모구리 코드가 존재하지 않습니다.")); // 데이터베이스에서 찾기
     }
