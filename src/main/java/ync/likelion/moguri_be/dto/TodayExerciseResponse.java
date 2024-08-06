@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TodayExerciseResponse {
     private int id;
-    private String exerciseContent;
+    private String content;
 }
+

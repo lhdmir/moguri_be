@@ -9,4 +9,6 @@ public interface TodayExerciseRepository extends JpaRepository<TodayExercise, In
     List<TodayExercise> findById(int id);
 
     List<TodayExercise> findAllByIdAndUserId(int id, int id1);
+
+    List<TodayExercise> findAllByUserId(int id);
 }
