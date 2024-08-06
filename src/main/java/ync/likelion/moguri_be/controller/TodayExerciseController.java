@@ -49,11 +49,11 @@ public class TodayExerciseController {
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        List<TodayExercise> exercises = todayExerciseRepository.findByUserId(user.getId());
+        List<TodayExercise> exercises = todayExerciseRepository.findAllByUserId(user.getId());
         List<TodayExerciseResponse> exerciseResponses = exercises.stream().map(exercise -> {
             TodayExerciseResponse response = new TodayExerciseResponse();
             response.setId(exercise.getId());
-            response.setExerciseContent(exercise.getExerciseContent());
+            response.setContent(exercise.getExerciseContent());
             return response;
         }).collect(Collectors.toList());
 
@@ -77,7 +77,7 @@ public class TodayExerciseController {
         TodayExercise createdExercise = exerciseService.saveExercise(todayExercise);
         TodayExerciseResponse todayExerciseResponse = new TodayExerciseResponse();
         todayExerciseResponse.setId(createdExercise.getId());
-        todayExerciseResponse.setExerciseContent(todayExerciseDTO.getContent());
+        todayExerciseResponse.setContent(todayExerciseDTO.getContent());
         return ResponseEntity.status(HttpStatus.CREATED).body(todayExerciseResponse);
     }
 
@@ -126,7 +126,7 @@ public class TodayExerciseController {
         // DTO로 변환
         TodayExerciseResponse responseDto = new TodayExerciseResponse();
         responseDto.setId(updated.getId());
-        responseDto.setExerciseContent(updated.getExerciseContent());
+        responseDto.setContent(updated.getExerciseContent());
 
         // 응답 생성
         Map<String, Object> response = new HashMap<>();
