@@ -40,6 +40,8 @@ public class UserController {
     private BackgroundCodeRepository backgroundCodeRepository;
     @Autowired
     private AccessoryCodeRepository accessoryCodeRepository;
+    @Autowired
+    private TodayExerciseRepository todayExerciseRepository;
 
     private static final List<String> MOGURI_CODES = List.of(
         "https://moguri.site/image/moguri_1-1.png",
@@ -173,7 +175,17 @@ public class UserController {
             loginMoguri.setOwnedItem(ownedItems);
             loginMoguri.setTargetWeight(user.getTargetWeight());
 
-            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, loginMoguri, todayMeal, todayExercise);
+            List<TodayExerciseResponse> todayExerciseResponse = new ArrayList<>();
+            List<TodayExercise> exercises = todayExerciseRepository.findByUserId(user.getId());
+            for(TodayExercise exercise : exercises) {
+                TodayExerciseResponse response = new TodayExerciseResponse();
+                response.setId(exercise.getId());
+                response.setContent(exercise.getExerciseContent());
+                todayExerciseResponse.add(response);
+            }
+
+
+            LoginResponse loginResponse = new LoginResponse(token, cookieExpirationTime, loginMoguri, todayMeal, todayExerciseResponse);
             return ResponseEntity.ok(loginResponse);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("ID 또는 PW가 잘못되었습니다."));
